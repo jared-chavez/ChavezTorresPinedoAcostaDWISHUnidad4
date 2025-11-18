@@ -442,6 +442,7 @@ npm run start            # Iniciar servidor de producción
 
 # Calidad de Código
 npm run lint             # Ejecutar linter
+npm run type-check       # Verificar tipos de TypeScript
 
 ## Testing
 
@@ -806,6 +807,124 @@ openssl rand -base64 32
 ```
 
 **Nota importante:** `AUTH_SECRET` se usa para firmar tokens JWT, NO para revocar sesiones individuales. Para revocar sesiones individuales necesitas Database Sessions.
+
+## CI/CD con GitHub Actions
+
+Este repositorio incluye un pipeline de CI/CD automatizado que se ejecuta en las ramas `main` y `development`.
+
+### Configuración de Secrets
+
+Para que el pipeline funcione correctamente, configura los siguientes secrets en tu repositorio de GitHub:
+
+1. Ve a **Settings** → **Secrets and variables** → **Actions**
+2. Agrega los siguientes secrets:
+
+#### Secrets Requeridos (Opcionales para CI básico)
+
+- `DATABASE_URL`: URL de conexión a la base de datos PostgreSQL
+  - Formato: `postgresql://user:password@host:port/database`
+  - Nota: El workflow funcionará sin este secret usando valores por defecto para el build
+
+- `AUTH_SECRET`: Secret key para NextAuth
+  - Genera uno seguro: `openssl rand -base64 32`
+  - Nota: El workflow funcionará sin este secret usando valores por defecto para el build
+
+- `NEXTAUTH_URL`: URL base de tu aplicación
+  - Ejemplo: `https://tu-dominio.com`
+  - Nota: El workflow funcionará sin este secret usando valores por defecto
+
+#### Secrets Opcionales
+
+- `CODECOV_TOKEN`: Token para subir reportes de cobertura a Codecov
+  - Solo necesario si quieres usar Codecov para tracking de cobertura
+  - Obtén tu token en: https://codecov.io
+
+### Workflow Jobs
+
+El pipeline incluye tres jobs principales que se ejecutan en paralelo (excepto build que espera a los otros):
+
+#### 1. Lint & Type Check
+- Ejecuta ESLint para verificar la calidad del código
+- Ejecuta TypeScript type checking
+- Tiempo máximo: 10 minutos
+
+#### 2. Run Tests
+- Ejecuta todos los tests con Jest
+- Genera reportes de cobertura
+- Sube reportes a Codecov (si está configurado)
+- Tiempo máximo: 15 minutos
+
+#### 3. Build Application
+- Genera el build de producción de Next.js
+- Verifica que los artefactos se generen correctamente
+- Solo se ejecuta si los jobs anteriores pasan
+- Tiempo máximo: 15 minutos
+
+### Triggers
+
+El workflow se ejecuta automáticamente cuando:
+- Se hace push a las ramas `main` o `development`
+- Se crea o actualiza un Pull Request hacia `main` o `development`
+
+### Cache
+
+El workflow utiliza cache para optimizar el tiempo de ejecución:
+- **npm cache**: Cachea las dependencias de npm
+- **Prisma cache**: Cachea el Prisma Client generado
+
+### Troubleshooting del CI/CD
+
+#### El build falla con errores de variables de entorno
+- Verifica que los secrets estén configurados correctamente
+- Revisa los logs del job "Build Application" para ver qué variable falta
+
+#### Los tests fallan
+- Verifica que todas las dependencias estén instaladas
+- Revisa que los mocks y helpers de test estén correctamente configurados
+
+#### El lint falla
+- Ejecuta `npm run lint` localmente para ver los errores
+- Corrige los errores antes de hacer push
+
+### Mejores Prácticas para CI/CD
+
+1. **Siempre ejecuta los checks localmente antes de hacer push:**
+   ```bash
+   npm run lint
+   npm run type-check
+   npm test
+   npm run build
+   ```
+
+2. **No commitees cambios que rompan el build:**
+   - El pipeline bloqueará los PRs si el build falla
+
+3. **Mantén los tests actualizados:**
+   - Agrega tests para nuevas funcionalidades
+   - Mantén la cobertura de código alta
+
+4. **Revisa los logs del workflow:**
+   - Si un job falla, revisa los logs detallados en GitHub Actions
+
+### Estructura del Workflow
+
+```
+┌─────────────────────┐
+│  Lint & Type Check  │
+└──────────┬──────────┘
+           │
+           ├─────────────────┐
+           │                 │
+┌──────────▼──────────┐     │
+│    Run Tests        │     │
+└──────────┬──────────┘     │
+           │                 │
+           └────────┬────────┘
+                    │
+         ┌──────────▼──────────┐
+         │  Build Application  │
+         └────────────────────┘
+```
 
 ## Contribuir
 
