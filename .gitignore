@@ -237,3 +237,10 @@ local/
 # yarn.lock
 # pnpm-lock.yaml
 
+# Docker
+# NOTA: Dockerfile, docker-compose.yml y .dockerignore SÍ deben versionarse
+# Solo ignoramos archivos generados y temporales de Docker
+docker-compose.override.yml
+docker-compose.*.local.yml
+*.dockerignore.local
+

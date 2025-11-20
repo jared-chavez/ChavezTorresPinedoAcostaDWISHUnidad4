@@ -1,0 +1,71 @@
+services:
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: nocturna-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-nocturna_genesis}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nocturna-network
+
+  # Aplicación Next.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nocturna-app
+    restart: unless-stopped
+    environment:
+      # Base de datos
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-nocturna_genesis}?schema=public
+      
+      # NextAuth
+      AUTH_SECRET: ${AUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      
+      # App
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      NODE_ENV: production
+      
+      # MailerSend (opcional)
+      MAILERSEND_API_TOKEN: ${MAILERSEND_API_TOKEN:-}
+      MAILERSEND_FROM_EMAIL: ${MAILERSEND_FROM_EMAIL:-}
+      MAILERSEND_FROM_NAME: ${MAILERSEND_FROM_NAME:-Nocturna Genesis}
+      
+      # APIs externas (opcional)
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - nocturna-network
+    # Health check para la aplicación
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  nocturna-network:
+    driver: bridge
+
