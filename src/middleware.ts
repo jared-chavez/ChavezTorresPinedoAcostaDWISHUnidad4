@@ -20,6 +20,7 @@ export async function middleware(request: NextRequest) {
   // APIs públicas (solo lectura)
   const publicApiRoutes = [
     '/api/vehicles',        // GET de vehículos es público
+    '/api/health',          // Health check para Docker/load balancers
   ];
   
   // Verificar si es una ruta pública

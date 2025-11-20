@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import { loginSchema } from './validations';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true, // Confiar en el host (necesario para Docker)
   providers: [
     Credentials({
       credentials: {

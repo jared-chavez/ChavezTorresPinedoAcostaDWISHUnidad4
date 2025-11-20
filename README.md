@@ -926,6 +926,113 @@ El workflow utiliza cache para optimizar el tiempo de ejecución:
          └────────────────────┘
 ```
 
+## Docker - Despliegue con Contenedores
+
+Este proyecto incluye configuración completa de Docker para desarrollo y producción.
+
+### Requisitos Previos
+
+- Docker Desktop instalado y corriendo
+- Docker Compose v2 o superior
+
+### Configuración de Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+```env
+# PostgreSQL
+POSTGRES_PASSWORD=password
+POSTGRES_DB=nocturna_genesis
+POSTGRES_PORT=5432
+
+# Aplicación
+APP_PORT=3000
+
+# NextAuth (genera uno seguro: openssl rand -base64 32)
+AUTH_SECRET=tu-secret-key-super-segura-cambiar-en-produccion
+NEXTAUTH_URL=http://localhost:3000
+
+# App URL
+APP_URL=http://localhost:3000
+
+# MailerSend (opcional)
+MAILERSEND_API_TOKEN=
+MAILERSEND_FROM_EMAIL=
+MAILERSEND_FROM_NAME=Nocturna Genesis
+
+# APIs externas (opcional)
+OPENWEATHER_API_KEY=
+```
+
+**Nota importante:** NO incluyas `DATABASE_URL` en el `.env` para Docker. `docker-compose.yml` la construye automáticamente usando las variables `POSTGRES_*`.
+
+### Comandos Principales
+
+```bash
+# Construir y levantar (primera vez)
+docker-compose up --build
+
+# Levantar en segundo plano
+docker-compose up -d --build
+
+# Ver logs
+docker-compose logs -f
+
+# Detener servicios
+docker-compose down
+
+# Detener y eliminar volúmenes (⚠️ elimina datos)
+docker-compose down -v
+```
+
+### Inicialización de Base de Datos
+
+```bash
+# Sincronizar schema (primera vez)
+docker-compose exec app npx prisma db push
+
+# Aplicar migraciones (si usas migraciones)
+docker-compose exec app npx prisma migrate deploy
+
+# Poblar con datos de ejemplo (opcional)
+docker-compose exec app npm run db:seed
+```
+
+### Acceso a la Aplicación
+
+- **Aplicación**: http://localhost:3000
+- **Health Check**: http://localhost:3000/api/health
+- **Base de datos**: localhost:5432
+  - Usuario: `postgres`
+  - Password: (configurado en `POSTGRES_PASSWORD`)
+  - Database: `nocturna_genesis`
+
+### Solución de Problemas
+
+**Puerto ocupado:**
+- Cambia `APP_PORT` o `POSTGRES_PORT` en `.env` si los puertos están en uso
+
+**Error de conexión a BD:**
+```bash
+# Verificar estado
+docker-compose ps
+
+# Ver logs
+docker-compose logs db
+```
+
+**Reconstruir desde cero:**
+```bash
+docker-compose down -v
+docker-compose build --no-cache
+docker-compose up
+```
+
+### Estructura de Contenedores
+
+- **nocturna-db**: PostgreSQL 15 con persistencia de datos
+- **nocturna-app**: Next.js en modo producción con health checks
+
 ## Contribuir
 
 Las contribuciones son bienvenidas. Por favor, abre un issue o pull request.
