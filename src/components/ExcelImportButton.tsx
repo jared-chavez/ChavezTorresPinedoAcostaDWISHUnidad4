@@ -7,7 +7,7 @@ interface ExcelImportButtonProps {
   onImportComplete?: () => void;
   allowedRoles?: ('admin' | 'emprendedores')[];
   currentSales?: Array<{
-    vehicle?: { vin?: string };
+    vehicle?: { vin?: string; brand?: string; model?: string; year?: number } | string;
     vehicleInfo?: { vin?: string };
     vehicleId?: string;
     customerName?: string;
@@ -130,24 +130,46 @@ export default function ExcelImportButton({
       // Si hay ventas actuales, usarlas; sino usar datos de ejemplo
       if (currentSales && currentSales.length > 0) {
         currentSales.forEach((sale) => {
-          const saleDate = sale.saleDate 
-            ? (sale.saleDate instanceof Date 
-                ? sale.saleDate.toISOString().split('T')[0] 
-                : new Date(sale.saleDate).toISOString().split('T')[0])
-            : '';
+          // Formatear fecha de venta
+          let saleDate = '';
+          if (sale.saleDate) {
+            try {
+              const date = sale.saleDate instanceof Date 
+                ? sale.saleDate 
+                : new Date(sale.saleDate);
+              // Verificar que la fecha sea válida
+              if (!isNaN(date.getTime())) {
+                saleDate = date.toISOString().split('T')[0];
+              }
+            } catch (e) {
+              console.warn('Error al formatear fecha:', e);
+              saleDate = '';
+            }
+          }
           
-          // Obtener VIN del vehículo (puede estar en vehicle.vin o vehicleInfo.vin)
-          const vin = sale.vehicle?.vin || sale.vehicleInfo?.vin || '';
+          // Obtener VIN del vehículo
+          // Puede estar en:
+          // 1. vehicle.vin (si vehicle es un objeto)
+          // 2. vehicleInfo.vin (si vehicle es un string)
+          let vin = '';
+          if (sale.vehicle && typeof sale.vehicle === 'object' && 'vin' in sale.vehicle) {
+            vin = sale.vehicle.vin || '';
+          } else if (sale.vehicleInfo?.vin) {
+            vin = sale.vehicleInfo.vin;
+          }
+          
+          // Si aún no hay VIN, intentar obtenerlo del vehicleId si es necesario
+          // (esto requeriría una llamada adicional, por ahora dejamos vacío)
           
           templateData.push([
-            vin,
+            vin || 'N/A', // VIN - usar 'N/A' si no está disponible
             sale.customerName || '',
             sale.customerEmail || '',
             sale.customerPhone || '',
             sale.salePrice?.toString() || '0',
             sale.paymentMethod || '',
-            sale.status || '',
-            saleDate,
+            sale.status || 'completed',
+            saleDate || new Date().toISOString().split('T')[0], // Si no hay fecha, usar hoy
             sale.notes || '',
           ]);
         });

@@ -62,6 +62,44 @@ function loadEmailTemplate(templateName: string): string {
   }
 }
 
+// Función centralizada para obtener la URL de la aplicación
+// Prioriza NEXTAUTH_URL, luego APP_URL, y finalmente un fallback
+function getAppUrl(): string {
+  // Priorizar NEXTAUTH_URL (configurado en NextAuth)
+  let appUrl = process.env.NEXTAUTH_URL;
+  
+  // Si no existe, usar APP_URL
+  if (!appUrl) {
+    appUrl = process.env.APP_URL;
+  }
+  
+  // Si aún no existe, usar NEXT_PUBLIC_APP_URL (para client-side)
+  if (!appUrl) {
+    appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  }
+  
+  // Fallback solo si ninguna variable está configurada
+  if (!appUrl) {
+    // En producción, usar localhost:8443 (HTTPS local)
+    if (process.env.NODE_ENV === 'production') {
+      appUrl = 'https://localhost:8443';
+} else {
+      // En desarrollo, usar localhost:3000
+      appUrl = 'http://localhost:3000';
+    }
+  }
+  
+  // Asegurar que la URL no termine con /
+  appUrl = appUrl.trim().replace(/\/$/, '');
+  
+  // Log en desarrollo para debugging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📧 URL de aplicación para emails:', appUrl);
+  }
+  
+  return appUrl;
+}
+
 // Reemplazar variables en el template
 function replaceTemplateVariables(template: string, variables: Record<string, string>): string {
   let result = template;
@@ -97,19 +135,8 @@ export async function sendVerificationEmail(
       };
     }
 
-    // Construir URL de verificación
-    // Priorizar NEXTAUTH_URL (ya incluye protocolo y puerto correcto)
-    // Si no existe, usar APP_URL, y si es localhost sin puerto, agregar 8443 para HTTPS
-    let appUrl = process.env.NEXTAUTH_URL || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
-    // Si es localhost sin puerto específico y estamos en producción, usar HTTPS en 8443
-    if (appUrl.includes('localhost') && !appUrl.includes(':') && process.env.NODE_ENV === 'production') {
-      appUrl = 'https://localhost:8443';
-    } else if (appUrl.includes('localhost') && !appUrl.includes(':')) {
-      // Desarrollo local sin puerto, usar 3000
-      appUrl = 'http://localhost:3000';
-    }
-    
+    // Construir URL de verificación usando función centralizada
+    const appUrl = getAppUrl();
     const verificationUrl = `${appUrl}/verify-email?token=${verificationToken}`;
 
     const template = loadEmailTemplate('verification-email');
@@ -240,7 +267,7 @@ export async function sendWelcomeEmail(
       };
     }
 
-    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = getAppUrl();
     const htmlContent = `
       <!DOCTYPE html>
       <html>

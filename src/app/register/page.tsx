@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import axios from 'axios';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 // Validaciones JavaScript
 const validateName = (name: string): string | null => {
@@ -150,6 +150,8 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   // Estados para validación de campos
   const [errors, setErrors] = useState<{
@@ -370,41 +372,127 @@ export default function RegisterPage() {
                   />
 
                   {/* Campo Contraseña */}
-                  <FormField
-                    id="password"
-                    label="Contraseña"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleFieldChange('password')}
-                    onBlur={() => handleBlur('password')}
-                    placeholder="••••••••"
-                    icon={() => (
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
+                  <div>
+                    <label
+                      htmlFor="password"
+                      className={`block text-sm font-medium mb-2 ${
+                        touched.password && errors.password
+                          ? 'text-red-700 dark:text-red-400'
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none ${
+                        touched.password && errors.password ? 'text-red-500' : 'text-gray-400'
+                      }`}>
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </div>
+                      <input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={formData.password}
+                        onChange={handleFieldChange('password')}
+                        onBlur={() => handleBlur('password')}
+                        placeholder="••••••••"
+                        className={`w-full pl-10 ${touched.password && errors.password ? 'pr-20' : 'pr-12'} py-3 border rounded-xl transition-all ${
+                          touched.password && errors.password
+                            ? 'border-red-500 dark:border-red-500 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-red-50 dark:bg-red-900/20'
+                            : 'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-gray-600 dark:focus:ring-gray-500 focus:border-gray-600 dark:focus:border-gray-500 bg-white dark:bg-gray-800'
+                        } dark:text-white`}
+                      />
+                      {touched.password && errors.password && (
+                        <div className="absolute inset-y-0 right-12 pr-3 flex items-center pointer-events-none z-10">
+                          <AlertCircle className="h-5 w-5 text-red-500" />
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-20 cursor-pointer"
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {touched.password && errors.password && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.password}
+                      </p>
                     )}
-                    error={errors.password}
-                    touched={touched.password}
-                    hint="Mínimo 8 caracteres, incluir mayúsculas, minúsculas y números"
-                  />
+                    {!touched.password && !errors.password && (
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Mínimo 8 caracteres, incluir mayúsculas, minúsculas y números
+                      </p>
+                    )}
+                  </div>
 
                   {/* Campo Confirmar Contraseña */}
-                  <FormField
-                    id="confirmPassword"
-                    label="Confirmar Contraseña"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={handleFieldChange('confirmPassword')}
-                    onBlur={() => handleBlur('confirmPassword')}
-                    placeholder="••••••••"
-                    icon={() => (
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
+                  <div>
+                    <label
+                      htmlFor="confirmPassword"
+                      className={`block text-sm font-medium mb-2 ${
+                        touched.confirmPassword && errors.confirmPassword
+                          ? 'text-red-700 dark:text-red-400'
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      Confirmar Contraseña
+                    </label>
+                    <div className="relative">
+                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none ${
+                        touched.confirmPassword && errors.confirmPassword ? 'text-red-500' : 'text-gray-400'
+                      }`}>
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={formData.confirmPassword}
+                        onChange={handleFieldChange('confirmPassword')}
+                        onBlur={() => handleBlur('confirmPassword')}
+                        placeholder="••••••••"
+                        className={`w-full pl-10 ${touched.confirmPassword && errors.confirmPassword ? 'pr-20' : 'pr-12'} py-3 border rounded-xl transition-all ${
+                          touched.confirmPassword && errors.confirmPassword
+                            ? 'border-red-500 dark:border-red-500 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-red-50 dark:bg-red-900/20'
+                            : 'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-gray-600 dark:focus:ring-gray-500 focus:border-gray-600 dark:focus:border-gray-500 bg-white dark:bg-gray-800'
+                        } dark:text-white`}
+                      />
+                      {touched.confirmPassword && errors.confirmPassword && (
+                        <div className="absolute inset-y-0 right-12 pr-3 flex items-center pointer-events-none z-10">
+                          <AlertCircle className="h-5 w-5 text-red-500" />
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-20 cursor-pointer"
+                        aria-label={showConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {touched.confirmPassword && errors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.confirmPassword}
+                      </p>
                     )}
-                    error={errors.confirmPassword}
-                    touched={touched.confirmPassword}
-                  />
+                  </div>
 
                   {/* Botón de Registro */}
                   <button
