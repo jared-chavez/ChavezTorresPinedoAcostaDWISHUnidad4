@@ -35,3 +35,4 @@ echo ""
 echo "📊 Tablas creadas:"
 docker exec nocturna-db-prod psql -U postgres -d nocturna_genesis -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';" 2>&1 | grep -v "table_name\|----\|row"
 
+

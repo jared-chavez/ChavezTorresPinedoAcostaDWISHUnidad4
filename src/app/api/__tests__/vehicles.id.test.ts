@@ -199,3 +199,4 @@ describe('API /api/vehicles/[id]', () => {
   });
 });
 
+

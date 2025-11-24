@@ -66,3 +66,4 @@ Al agregar nuevos endpoints, asegúrate de:
 - Verificar códigos de estado HTTP correctos
 - Validar estructura de respuestas JSON
 
+
