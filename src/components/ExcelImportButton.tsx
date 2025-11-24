@@ -129,7 +129,8 @@ export default function ExcelImportButton({
       
       // Si hay ventas actuales, usarlas; sino usar datos de ejemplo
       if (currentSales && currentSales.length > 0) {
-        currentSales.forEach((sale) => {
+        console.log(`📊 Exportando ${currentSales.length} venta(s) real(es) desde la BD`);
+        currentSales.forEach((sale, index) => {
           // Formatear fecha de venta
           let saleDate = '';
           if (sale.saleDate) {
@@ -148,18 +149,24 @@ export default function ExcelImportButton({
           }
           
           // Obtener VIN del vehículo
-          // Puede estar en:
-          // 1. vehicle.vin (si vehicle es un objeto)
-          // 2. vehicleInfo.vin (si vehicle es un string)
+          // Prioridad: vehicleInfo.vin > vehicle.vin (si es objeto) > N/A
           let vin = '';
-          if (sale.vehicle && typeof sale.vehicle === 'object' && 'vin' in sale.vehicle) {
-            vin = sale.vehicle.vin || '';
-          } else if (sale.vehicleInfo?.vin) {
+          if (sale.vehicleInfo?.vin) {
             vin = sale.vehicleInfo.vin;
+          } else if (sale.vehicle && typeof sale.vehicle === 'object' && 'vin' in sale.vehicle) {
+            vin = sale.vehicle.vin || '';
           }
           
-          // Si aún no hay VIN, intentar obtenerlo del vehicleId si es necesario
-          // (esto requeriría una llamada adicional, por ahora dejamos vacío)
+          // Log para debugging (solo en desarrollo)
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Venta ${index + 1}:`, {
+              customerName: sale.customerName,
+              salePrice: sale.salePrice,
+              vin: vin || 'N/A',
+              hasVehicleInfo: !!sale.vehicleInfo,
+              hasVehicleObject: sale.vehicle && typeof sale.vehicle === 'object',
+            });
+          }
           
           templateData.push([
             vin || 'N/A', // VIN - usar 'N/A' si no está disponible
@@ -175,6 +182,7 @@ export default function ExcelImportButton({
         });
       } else {
         // Datos de ejemplo solo si no hay ventas reales
+        console.warn('⚠️  No hay ventas reales, usando datos de ejemplo');
         templateData.push(
           ['1HGBH41JXMN109186', 'Juan Pérez', 'juan@email.com', '5551234567', '700000', 'credit', 'completed', '2025-11-12', 'Venta especial'],
           ['2HGFB2F59NH123456', 'María García', 'maria@email.com', 'N/A', '28000', 'cash', 'completed', '2025-11-12', 'N/A'],
@@ -211,7 +219,11 @@ export default function ExcelImportButton({
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.href = url;
-      link.download = 'template_importar_ventas.xlsx';
+      // Nombre del archivo: usar "ventas_exportadas" si hay datos reales, "template" si es ejemplo
+      const fileName = currentSales && currentSales.length > 0 
+        ? `ventas_exportadas_${new Date().toISOString().split('T')[0]}.xlsx`
+        : 'template_importar_ventas.xlsx';
+      link.download = fileName;
       link.style.display = 'none';
       
       // Agregar al DOM, hacer click, y remover
@@ -224,7 +236,10 @@ export default function ExcelImportButton({
         URL.revokeObjectURL(url);
       }, 200);
 
-      showToast('Plantilla descargada exitosamente', 'success');
+      const message = currentSales && currentSales.length > 0
+        ? `${currentSales.length} venta(s) exportada(s) exitosamente`
+        : 'Plantilla descargada exitosamente';
+      showToast(message, 'success');
     } catch (error) {
       console.error('Error al generar plantilla:', error);
       const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
