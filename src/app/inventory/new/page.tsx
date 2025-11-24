@@ -35,7 +35,7 @@ export default function NewVehiclePage() {
     brand: '',
     model: '',
     year: new Date().getFullYear(),
-    color: '',
+    color: '#000000',
     price: 0,
     mileage: 0,
     fuelType: 'gasoline',
@@ -244,13 +244,84 @@ export default function NewVehiclePage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Color *
                 </label>
-                <input
-                  type="text"
-                  value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="color"
+                    value={formData.color || '#000000'}
+                    onChange={(e) => {
+                      const colorValue = e.target.value.toUpperCase();
+                      setFormData({ ...formData, color: colorValue });
+                    }}
+                    className="h-12 w-16 border-2 border-gray-300 rounded-lg cursor-pointer dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow"
+                    title="Selecciona un color"
+                  />
+                  <input
+                    type="text"
+                    value={formData.color || '#000000'}
+                    onChange={(e) => {
+                      let value = e.target.value.toUpperCase();
+                      // Asegurar que empiece con #
+                      if (value && !value.startsWith('#')) {
+                        value = '#' + value.replace(/#/g, '');
+                      }
+                      // Validar formato hexadecimal
+                      if (value === '' || value === '#' || /^#[0-9A-F]{0,6}$/.test(value)) {
+                        setFormData({ ...formData, color: value || '#000000' });
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Asegurar formato completo al perder foco
+                      let value = e.target.value.toUpperCase();
+                      if (!value || value === '#') {
+                        value = '#000000';
+                      } else if (!value.startsWith('#')) {
+                        value = '#' + value;
+                      }
+                      // Completar a 7 caracteres si falta
+                      if (value.length < 7 && /^#[0-9A-F]{1,6}$/.test(value)) {
+                        const hex = value.substring(1);
+                        value = '#' + hex.padEnd(6, '0');
+                      }
+                      setFormData({ ...formData, color: value });
+                    }}
+                    placeholder="#000000"
+                    maxLength={7}
+                    required
+                    className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono text-sm"
+                  />
+                </div>
+                <div className="mt-3">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Colores comunes:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { code: '#000000', name: 'Negro' },
+                      { code: '#FFFFFF', name: 'Blanco' },
+                      { code: '#FF0000', name: 'Rojo' },
+                      { code: '#0000FF', name: 'Azul' },
+                      { code: '#00FF00', name: 'Verde' },
+                      { code: '#FFFF00', name: 'Amarillo' },
+                      { code: '#FFA500', name: 'Naranja' },
+                      { code: '#808080', name: 'Gris' },
+                      { code: '#800080', name: 'Morado' },
+                      { code: '#A52A2A', name: 'Marrón' },
+                    ].map(({ code, name }) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, color: code })}
+                        className="flex items-center gap-1 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 hover:scale-105 hover:shadow-sm transition-all"
+                        style={{ backgroundColor: code === '#FFFFFF' ? code : 'transparent' }}
+                        title={`${name} (${code})`}
+                      >
+                        <span 
+                          className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600" 
+                          style={{ backgroundColor: code }}
+                        />
+                        <span className="text-xs text-gray-700 dark:text-gray-300 font-mono">{code}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div>

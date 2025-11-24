@@ -160,8 +160,17 @@ Abre [http://localhost:3000](http://localhost:3000)
 
 ## Credenciales por Defecto
 
+### Administrador
 - **Email:** `admin@agencia.com`
 - **Password:** `Admin123!`
+- **Rol:** `admin` (acceso completo)
+
+### Vendedor/Ventas (Emprendedor)
+- **Email:** `sales@agencia.com` o `emprendedor@agencia.com`
+- **Password:** `Sales123!` o `Emprendedor123!`
+- **Rol:** `emprendedores` (puede crear/editar vehículos y registrar ventas)
+
+**Nota**: Si los usuarios no existen, ejecuta `./scripts/create-users.sh` o `docker exec nocturna-app-1 npx tsx prisma/seed.ts`
 
 ## Roles y Permisos
 
@@ -925,6 +934,54 @@ El workflow utiliza cache para optimizar el tiempo de ejecución:
          │  Build Application  │
          └────────────────────┘
 ```
+
+## 🚀 Despliegue en la Nube (Unidad 4)
+
+Este proyecto incluye **infraestructura completa de despliegue en la nube** con:
+
+- ✅ **Servidor de aplicaciones**: Múltiples instancias de Next.js (app1, app2, app3)
+- ✅ **Servidor de base de datos**: PostgreSQL 15 con persistencia
+- ✅ **Balanceo de cargas**: Nginx Load Balancer con algoritmo `least_conn`
+- ✅ **Configuración de dominio**: Guía completa paso a paso
+- ✅ **Certificados SSL/TLS**: Let's Encrypt (gratis) y más opciones
+
+### 📚 Documentación
+
+- **[PENDING-TASKS.md](./PENDING-TASKS.md)** - Tareas pendientes, guía de despliegue, dominio y certificados SSL
+
+### Despliegue Rápido
+
+```bash
+# 1. Configurar variables de entorno
+cp .env.prod.example .env.prod
+nano .env.prod
+
+# 2. Desplegar
+./scripts/deploy-prod.sh
+
+# 3. Inicializar base de datos (crear tablas)
+./scripts/init-database.sh
+
+# 4. Verificar
+docker-compose -f docker-compose.prod.yml --env-file .env.prod ps
+```
+
+**⚠️ Importante**: 
+- Después de reiniciar Docker, ejecuta `./scripts/init-database.sh` para crear las tablas si no existen.
+- Para crear usuarios de prueba, ejecuta: `docker exec nocturna-app-1 npx tsx prisma/seed.ts`
+
+### Estado del Proyecto
+
+**Progreso**: 93% Completado ✅
+
+- ✅ Contenedor Docker con aplicación desplegada
+- ✅ Servidor de aplicaciones (3 instancias)
+- ✅ Servidor de base de datos (PostgreSQL)
+- ✅ Balanceo de cargas (Nginx) - **Verificado funcionando**
+- ⏳ Configuración de dominio (documentación lista)
+- ⏳ Certificados SSL/TLS (documentación lista)
+
+Ver [PENDING-TASKS.md](./PENDING-TASKS.md) para completar el 7% restante.
 
 ## Docker - Despliegue con Contenedores
 
