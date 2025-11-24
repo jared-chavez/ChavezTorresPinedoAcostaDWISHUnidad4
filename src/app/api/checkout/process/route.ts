@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth';
 import { saleDB, vehicleDB } from '@/lib/db';
 import { saleSchema } from '@/lib/validations';
 import { generateInvoiceNumber, calculateTax, calculateTotal } from '@/lib/invoice-utils';
+import { sendPurchaseReceipt } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -79,10 +80,37 @@ export async function POST(request: NextRequest) {
     // Actualizar estado del vehículo a "sold"
     await vehicleDB.update(validated.vehicleId, { status: 'sold' });
 
+    // Enviar comprobante de compra por email
+    const emailResult = await sendPurchaseReceipt(
+      validated.customerEmail,
+      validated.customerName,
+      {
+        invoiceNumber: sale.invoiceNumber,
+        vehicle: {
+          brand: vehicle.brand,
+          model: vehicle.model,
+          year: vehicle.year,
+          color: vehicle.color,
+          vin: vehicle.vin,
+        },
+        salePrice: sale.salePrice,
+        taxAmount: sale.taxAmount,
+        totalAmount: sale.totalAmount,
+        paymentMethod: sale.paymentMethod,
+        saleDate: sale.saleDate,
+      }
+    );
+
+    if (!emailResult.success) {
+      console.error('Error enviando comprobante de compra:', emailResult.error);
+      // No fallar la compra si el email falla, pero loguear el error
+    }
+
     return NextResponse.json({
       success: true,
       sale,
       message: 'Compra realizada exitosamente',
+      emailSent: emailResult.success,
     }, { status: 201 });
   } catch (error: unknown) {
     if (error instanceof Error && 'errors' in error) {

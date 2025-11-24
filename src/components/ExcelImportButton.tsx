@@ -6,6 +6,19 @@ import { useToast } from '@/components/ToastProvider';
 interface ExcelImportButtonProps {
   onImportComplete?: () => void;
   allowedRoles?: ('admin' | 'emprendedores')[];
+  currentSales?: Array<{
+    vehicle?: { vin?: string };
+    vehicleInfo?: { vin?: string };
+    vehicleId?: string;
+    customerName?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    salePrice?: number;
+    paymentMethod?: string;
+    status?: string;
+    saleDate?: Date | string;
+    notes?: string;
+  }>;
 }
 
 interface ImportResult {
@@ -18,7 +31,8 @@ interface ImportResult {
 
 export default function ExcelImportButton({ 
   onImportComplete,
-  allowedRoles = ['admin', 'emprendedores']
+  allowedRoles = ['admin', 'emprendedores'],
+  currentSales = []
 }: ExcelImportButtonProps) {
   const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,13 +122,43 @@ export default function ExcelImportButton({
         throw new Error('Error al cargar la librería xlsx. Por favor, recarga la página.');
       }
 
-      // Crear template Excel con todos los campos
-      const templateData = [
-        ['VIN', 'Nombre Cliente', 'Email Cliente', 'Teléfono Cliente', 'Precio Venta', 'Método Pago', 'Estado', 'Fecha Venta', 'Notas'],
-        ['1HGBH41JXMN109186', 'Juan Pérez', 'juan@email.com', '5551234567', '700000', 'credit', 'completed', '2025-11-12', 'Venta especial'],
-        ['2HGFB2F59NH123456', 'María García', 'maria@email.com', 'N/A', '28000', 'cash', 'completed', '2025-11-12', 'N/A'],
-        ['5YJ3E1EA1KF123789', 'Carlos López', 'carlos@email.com', '', '45000', 'financing', 'pending', '', ''],
-      ];
+      // Crear template Excel con datos reales si existen, sino usar datos de ejemplo
+      const headerRow = ['VIN', 'Nombre Cliente', 'Email Cliente', 'Teléfono Cliente', 'Precio Venta', 'Método Pago', 'Estado', 'Fecha Venta', 'Notas'];
+      
+      let templateData: (string | number)[][] = [headerRow];
+      
+      // Si hay ventas actuales, usarlas; sino usar datos de ejemplo
+      if (currentSales && currentSales.length > 0) {
+        currentSales.forEach((sale) => {
+          const saleDate = sale.saleDate 
+            ? (sale.saleDate instanceof Date 
+                ? sale.saleDate.toISOString().split('T')[0] 
+                : new Date(sale.saleDate).toISOString().split('T')[0])
+            : '';
+          
+          // Obtener VIN del vehículo (puede estar en vehicle.vin o vehicleInfo.vin)
+          const vin = sale.vehicle?.vin || sale.vehicleInfo?.vin || '';
+          
+          templateData.push([
+            vin,
+            sale.customerName || '',
+            sale.customerEmail || '',
+            sale.customerPhone || '',
+            sale.salePrice?.toString() || '0',
+            sale.paymentMethod || '',
+            sale.status || '',
+            saleDate,
+            sale.notes || '',
+          ]);
+        });
+      } else {
+        // Datos de ejemplo solo si no hay ventas reales
+        templateData.push(
+          ['1HGBH41JXMN109186', 'Juan Pérez', 'juan@email.com', '5551234567', '700000', 'credit', 'completed', '2025-11-12', 'Venta especial'],
+          ['2HGFB2F59NH123456', 'María García', 'maria@email.com', 'N/A', '28000', 'cash', 'completed', '2025-11-12', 'N/A'],
+          ['5YJ3E1EA1KF123789', 'Carlos López', 'carlos@email.com', '', '45000', 'financing', 'pending', '', ''],
+        );
+      }
 
       // Crear workbook
       const wb = XLSX.utils.book_new();

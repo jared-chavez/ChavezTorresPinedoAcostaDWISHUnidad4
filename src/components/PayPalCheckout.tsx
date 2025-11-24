@@ -282,7 +282,7 @@ export default function PayPalCheckout({
           <button
             type="submit"
             disabled={processing}
-            className="w-full bg-gray-700 hover:bg-gray-800 text-white px-6 py-4 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 text-white px-6 py-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed enabled:cursor-pointer flex items-center justify-center gap-2 shadow-lg hover:shadow-xl focus:shadow-xl"
           >
             {processing ? (
               <>

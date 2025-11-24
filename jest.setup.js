@@ -1,14 +1,11 @@
 // Learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom'
+require('@testing-library/jest-dom')
 
-// Polyfills mínimos para NextRequest en Jest
+// Polyfills para NextRequest en Jest
 // Next.js necesita Request/Response/Headers disponibles
-// Usamos las implementaciones nativas de Node.js 18+ cuando están disponibles
-if (typeof globalThis.Request === 'undefined') {
-  // En Node.js 18+, Request/Response están disponibles globalmente
-  // Si no están, Next.js los proporcionará internamente
-  // No necesitamos polyfills adicionales
-}
+// En Node.js 18+, estos están disponibles globalmente
+// Para Jest, Next.js los proporciona automáticamente cuando se importa
+// No necesitamos polyfills aquí - Next.js los maneja
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({

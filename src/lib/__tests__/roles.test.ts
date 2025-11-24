@@ -64,7 +64,7 @@ describe('Roles and Permissions', () => {
       expect(emprendedoresDesc.length).toBeGreaterThan(0);
 
       const usuariosDesc = getRoleDescription('usuarios_regulares');
-      expect(usuariosDesc).toContain('Solo lectura');
+      expect(usuariosDesc).toContain('Cliente final');
       expect(usuariosDesc.length).toBeGreaterThan(0);
     });
 

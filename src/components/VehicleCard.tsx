@@ -75,7 +75,17 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {vehicle.brand} {vehicle.model}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{vehicle.year} • {vehicle.color}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              {vehicle.year} • 
+              <span className="flex items-center gap-1">
+                <span 
+                  className="inline-block w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600" 
+                  style={{ backgroundColor: vehicle.color }}
+                  title={vehicle.color}
+                />
+                {vehicle.color}
+              </span>
+            </p>
           </div>
           
           <div className="grid grid-cols-2 gap-3 mb-4 text-sm">

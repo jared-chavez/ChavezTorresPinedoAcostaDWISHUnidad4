@@ -23,7 +23,7 @@ export const vehicleSchema = z.object({
   brand: z.string().min(1, 'La marca es requerida'),
   model: z.string().min(1, 'El modelo es requerido'),
   year: z.number().int().min(1900).max(new Date().getFullYear() + 1),
-  color: z.string().min(1, 'El color es requerido'),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'El color debe ser un código hexadecimal válido (ej: #000000)'),
   price: z.number().positive('El precio debe ser positivo'),
   mileage: z.number().nonnegative('El kilometraje no puede ser negativo'),
   fuelType: z.enum(['gasoline', 'diesel', 'electric', 'hybrid']),

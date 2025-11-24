@@ -52,5 +52,11 @@ export interface Sale {
   paymentMethod: 'cash' | 'credit' | 'financing';
   status: 'completed' | 'cancelled' | 'pending' | 'refunded'; // Estado de venta
   notes?: string;
+  vehicle?: {
+    vin: string;
+    brand: string;
+    model: string;
+    year: number;
+  };
 }
 

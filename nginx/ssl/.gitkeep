@@ -1,0 +1,4 @@
+# Este directorio contendrá los certificados SSL
+# NO commitees certificados reales a git
+# Agrega *.pem, *.key, *.crt a .gitignore
+
