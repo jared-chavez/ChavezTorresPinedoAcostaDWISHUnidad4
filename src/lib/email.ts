@@ -18,7 +18,7 @@ let sendWelcomeEmailImpl: (
   to: string,
   name: string
 ) => Promise<EmailResult>;
-
+  
 // Cargar implementación según el proveedor
 if (EMAIL_PROVIDER === 'resend') {
   try {
@@ -124,10 +124,10 @@ export async function sendPurchaseReceipt(
   }
   
   // Para otros proveedores, retornar error
-  return {
-    success: false,
+    return {
+      success: false,
     error: 'Envío de comprobante solo disponible con Resend',
-  };
+    };
 }
 
 // Re-exportar tipos

@@ -59,3 +59,4 @@ echo "  2. Reinicia Nginx: docker-compose restart nginx"
 echo "  3. Accede a https://localhost:8443"
 echo "  4. Acepta la advertencia de seguridad del navegador"
 
+

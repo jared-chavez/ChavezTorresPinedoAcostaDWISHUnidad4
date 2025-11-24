@@ -255,8 +255,8 @@ export default function NewVehiclePage() {
                     className="h-12 w-16 border-2 border-gray-300 rounded-lg cursor-pointer dark:border-gray-600 shadow-sm hover:shadow-md transition-shadow"
                     title="Selecciona un color"
                   />
-                  <input
-                    type="text"
+                <input
+                  type="text"
                     value={formData.color || '#000000'}
                     onChange={(e) => {
                       let value = e.target.value.toUpperCase();
@@ -286,9 +286,9 @@ export default function NewVehiclePage() {
                     }}
                     placeholder="#000000"
                     maxLength={7}
-                    required
+                  required
                     className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono text-sm"
-                  />
+                />
                 </div>
                 <div className="mt-3">
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Colores comunes:</p>
