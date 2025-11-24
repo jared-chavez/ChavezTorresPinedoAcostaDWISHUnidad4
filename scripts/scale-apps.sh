@@ -25,3 +25,4 @@ echo "✅ Escalado completado"
 echo "📊 Estado actual:"
 docker-compose -f docker-compose.prod.yml ps | grep app
 
+

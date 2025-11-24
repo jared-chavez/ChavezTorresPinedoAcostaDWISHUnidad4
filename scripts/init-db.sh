@@ -30,3 +30,4 @@ EOSQL
 
 echo "✅ Base de datos inicializada"
 
+
