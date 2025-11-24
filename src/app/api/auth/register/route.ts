@@ -13,9 +13,11 @@ export async function POST(request: NextRequest) {
   try {
     // 1. Obtener IP del cliente
     const clientIp = getClientIp(request);
+    console.log(`🔍 IP detectada para registro: ${clientIp}`);
 
     // 2. Validar IP (blacklist)
     if (await isIpBlacklisted(clientIp)) {
+      console.log(`❌ Registro bloqueado para IP: ${clientIp}`);
       return NextResponse.json(
         { error: 'Tu IP ha sido bloqueada. Contacta al administrador.' },
         { status: 403 }

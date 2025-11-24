@@ -71,6 +71,14 @@ export default function SalesPage() {
           ? null 
           : vehiclesData.find((v) => v.id === sale.vehicleId);
         
+        // Determinar VIN para exportación Excel
+        let vin: string | undefined;
+        if (vehicleFromSale && vehicleFromSale.vin) {
+          vin = vehicleFromSale.vin;
+        } else if (vehicle && vehicle.vin) {
+          vin = vehicle.vin;
+        }
+        
         return {
           ...sale,
           vehicle: vehicleFromSale
@@ -79,11 +87,7 @@ export default function SalesPage() {
             ? `${vehicle.brand} ${vehicle.model} ${vehicle.year}`
             : 'Vehículo no encontrado',
           // Agregar información completa del vehículo para exportación Excel
-          vehicleInfo: vehicleFromSale 
-            ? { vin: vehicleFromSale.vin } 
-            : vehicle 
-            ? { vin: vehicle.vin } 
-            : undefined,
+          vehicleInfo: vin ? { vin } : undefined,
         };
       });
 

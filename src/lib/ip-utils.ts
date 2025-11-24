@@ -34,6 +34,12 @@ export function getClientIp(request: NextRequest): string {
  */
 export async function isIpBlacklisted(ip: string): Promise<boolean> {
   try {
+    // Ignorar IPs desconocidas o inválidas (común cuando se pasa por proxies/ngrok)
+    if (!ip || ip === 'unknown' || ip.trim() === '') {
+      console.log('⚠️  IP desconocida detectada, omitiendo verificación de blacklist');
+      return false;
+    }
+
     // Por ahora, solo verificamos en la tabla de usuarios
     // En el futuro, podrías crear una tabla IpBlacklist
     const blacklistedUser = await prisma.user.findFirst({
@@ -43,9 +49,14 @@ export async function isIpBlacklisted(ip: string): Promise<boolean> {
       },
     });
 
+    if (blacklistedUser) {
+      console.log(`🚫 IP bloqueada detectada: ${ip} (usuario suspendido: ${blacklistedUser.email})`);
+    }
+
     return !!blacklistedUser;
   } catch (error) {
     console.error('Error checking IP blacklist:', error);
+    // En caso de error, permitir el registro (fail-open)
     return false;
   }
 }
