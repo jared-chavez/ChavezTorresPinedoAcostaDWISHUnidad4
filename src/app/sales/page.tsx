@@ -15,6 +15,7 @@ import SaleStatusBadge from '@/components/SaleStatusBadge';
 
 interface SaleWithVehicle extends Sale {
   vehicle: string;
+  vehicleInfo?: { vin?: string };
 }
 
 export default function SalesPage() {
@@ -63,12 +64,26 @@ export default function SalesPage() {
       ]);
 
       const salesWithVehicles: SaleWithVehicle[] = salesData.map((sale) => {
-        const vehicle = vehiclesData.find((v) => v.id === sale.vehicleId);
+        // Si la API ya incluye vehicle.vin, usarlo directamente
+        const vehicleFromSale = sale.vehicle;
+        // Si no, buscar en vehiclesData
+        const vehicle = vehicleFromSale 
+          ? null 
+          : vehiclesData.find((v) => v.id === sale.vehicleId);
+        
         return {
           ...sale,
-          vehicle: vehicle
+          vehicle: vehicleFromSale
+            ? `${vehicleFromSale.brand} ${vehicleFromSale.model} ${vehicleFromSale.year}`
+            : vehicle
             ? `${vehicle.brand} ${vehicle.model} ${vehicle.year}`
             : 'Vehículo no encontrado',
+          // Agregar información completa del vehículo para exportación Excel
+          vehicleInfo: vehicleFromSale 
+            ? { vin: vehicleFromSale.vin } 
+            : vehicle 
+            ? { vin: vehicle.vin } 
+            : undefined,
         };
       });
 
@@ -185,7 +200,7 @@ export default function SalesPage() {
                   Total de ingresos: <span className="font-bold text-green-600">${totalRevenue.toLocaleString()}</span>
                 </p>
               </div>
-              <ExcelImportButton onImportComplete={fetchSales} />
+              <ExcelImportButton onImportComplete={fetchSales} currentSales={sales} />
             </div>
           </div>
 

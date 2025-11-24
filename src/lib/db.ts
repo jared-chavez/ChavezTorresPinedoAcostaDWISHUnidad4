@@ -381,6 +381,16 @@ export const vehicleDB = {
 export const saleDB = {
   async getAll(): Promise<Sale[]> {
     const sales = await prisma.sale.findMany({
+      include: {
+        vehicle: {
+          select: {
+            vin: true,
+            brand: true,
+            model: true,
+            year: true,
+          },
+        },
+      },
       orderBy: { saleDate: 'desc' },
     });
     return sales.map((s: any) => ({
@@ -398,6 +408,13 @@ export const saleDB = {
       paymentMethod: s.paymentMethod as Sale['paymentMethod'],
       status: (s.status || 'completed') as Sale['status'],
       notes: s.notes || undefined,
+      // Incluir información del vehículo para exportación Excel
+      vehicle: s.vehicle ? {
+        vin: s.vehicle.vin,
+        brand: s.vehicle.brand,
+        model: s.vehicle.model,
+        year: s.vehicle.year,
+      } : undefined,
     }));
   },
   

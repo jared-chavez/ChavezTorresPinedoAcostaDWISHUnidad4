@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { User, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { User, Lock, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 // Validaciones JavaScript
 const validateEmail = (email: string): string | null => {
@@ -115,6 +115,7 @@ function LoginForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   // Estados para validación de campos
   const [errors, setErrors] = useState<{
@@ -297,18 +298,61 @@ function LoginForm() {
                     touched={touched.email}
                   />
 
-                  <InputField
-                    id="password"
-                    label="Contraseña"
-                    type="password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    onBlur={() => handleBlur('password')}
-                    icon={Lock}
-                    placeholder="••••••••"
-                    error={errors.password}
-                    touched={touched.password}
-                  />
+                  <div>
+                    <label
+                      htmlFor="password"
+                      className={`block text-sm font-medium mb-2 ${
+                        touched.password && errors.password
+                          ? 'text-red-700 dark:text-red-400'
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none ${
+                        touched.password && errors.password ? 'text-red-500' : 'text-gray-400'
+                      }`}>
+                        <Lock className="h-5 w-5" />
+                      </div>
+                      <input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={handlePasswordChange}
+                        onBlur={() => handleBlur('password')}
+                        placeholder="••••••••"
+                        className={`w-full pl-10 ${touched.password && errors.password ? 'pr-20' : 'pr-12'} py-3 border rounded-xl transition-all duration-200 ${
+                          touched.password && errors.password
+                            ? 'border-red-500 dark:border-red-500 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-red-50 dark:bg-red-900/20'
+                            : 'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 bg-gray-50 dark:bg-gray-800'
+                        } dark:text-white`}
+                      />
+                      {touched.password && errors.password && (
+                        <div className="absolute inset-y-0 right-12 pr-3 flex items-center pointer-events-none z-10">
+                          <AlertCircle className="h-5 w-5 text-red-500" />
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-20 cursor-pointer"
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {touched.password && errors.password && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.password}
+                      </p>
+                    )}
+                  </div>
 
                   <button
                     type="submit"

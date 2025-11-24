@@ -6,6 +6,19 @@ import { useToast } from '@/components/ToastProvider';
 interface ExcelImportButtonProps {
   onImportComplete?: () => void;
   allowedRoles?: ('admin' | 'emprendedores')[];
+  currentSales?: Array<{
+    vehicle?: { vin?: string; brand?: string; model?: string; year?: number } | string;
+    vehicleInfo?: { vin?: string };
+    vehicleId?: string;
+    customerName?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    salePrice?: number;
+    paymentMethod?: string;
+    status?: string;
+    saleDate?: Date | string;
+    notes?: string;
+  }>;
 }
 
 interface ImportResult {
@@ -18,7 +31,8 @@ interface ImportResult {
 
 export default function ExcelImportButton({ 
   onImportComplete,
-  allowedRoles = ['admin', 'emprendedores']
+  allowedRoles = ['admin', 'emprendedores'],
+  currentSales = []
 }: ExcelImportButtonProps) {
   const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,13 +122,65 @@ export default function ExcelImportButton({
         throw new Error('Error al cargar la librería xlsx. Por favor, recarga la página.');
       }
 
-      // Crear template Excel con todos los campos
-      const templateData = [
-        ['VIN', 'Nombre Cliente', 'Email Cliente', 'Teléfono Cliente', 'Precio Venta', 'Método Pago', 'Estado', 'Fecha Venta', 'Notas'],
-        ['1HGBH41JXMN109186', 'Juan Pérez', 'juan@email.com', '5551234567', '700000', 'credit', 'completed', '2025-11-12', 'Venta especial'],
-        ['2HGFB2F59NH123456', 'María García', 'maria@email.com', 'N/A', '28000', 'cash', 'completed', '2025-11-12', 'N/A'],
-        ['5YJ3E1EA1KF123789', 'Carlos López', 'carlos@email.com', '', '45000', 'financing', 'pending', '', ''],
-      ];
+      // Crear template Excel con datos reales si existen, sino usar datos de ejemplo
+      const headerRow = ['VIN', 'Nombre Cliente', 'Email Cliente', 'Teléfono Cliente', 'Precio Venta', 'Método Pago', 'Estado', 'Fecha Venta', 'Notas'];
+      
+      let templateData: (string | number)[][] = [headerRow];
+      
+      // Si hay ventas actuales, usarlas; sino usar datos de ejemplo
+      if (currentSales && currentSales.length > 0) {
+        currentSales.forEach((sale) => {
+          // Formatear fecha de venta
+          let saleDate = '';
+          if (sale.saleDate) {
+            try {
+              const date = sale.saleDate instanceof Date 
+                ? sale.saleDate 
+                : new Date(sale.saleDate);
+              // Verificar que la fecha sea válida
+              if (!isNaN(date.getTime())) {
+                saleDate = date.toISOString().split('T')[0];
+              }
+            } catch (e) {
+              console.warn('Error al formatear fecha:', e);
+              saleDate = '';
+            }
+          }
+          
+          // Obtener VIN del vehículo
+          // Puede estar en:
+          // 1. vehicle.vin (si vehicle es un objeto)
+          // 2. vehicleInfo.vin (si vehicle es un string)
+          let vin = '';
+          if (sale.vehicle && typeof sale.vehicle === 'object' && 'vin' in sale.vehicle) {
+            vin = sale.vehicle.vin || '';
+          } else if (sale.vehicleInfo?.vin) {
+            vin = sale.vehicleInfo.vin;
+          }
+          
+          // Si aún no hay VIN, intentar obtenerlo del vehicleId si es necesario
+          // (esto requeriría una llamada adicional, por ahora dejamos vacío)
+          
+          templateData.push([
+            vin || 'N/A', // VIN - usar 'N/A' si no está disponible
+            sale.customerName || '',
+            sale.customerEmail || '',
+            sale.customerPhone || '',
+            sale.salePrice?.toString() || '0',
+            sale.paymentMethod || '',
+            sale.status || 'completed',
+            saleDate || new Date().toISOString().split('T')[0], // Si no hay fecha, usar hoy
+            sale.notes || '',
+          ]);
+        });
+      } else {
+        // Datos de ejemplo solo si no hay ventas reales
+        templateData.push(
+          ['1HGBH41JXMN109186', 'Juan Pérez', 'juan@email.com', '5551234567', '700000', 'credit', 'completed', '2025-11-12', 'Venta especial'],
+          ['2HGFB2F59NH123456', 'María García', 'maria@email.com', 'N/A', '28000', 'cash', 'completed', '2025-11-12', 'N/A'],
+          ['5YJ3E1EA1KF123789', 'Carlos López', 'carlos@email.com', '', '45000', 'financing', 'pending', '', ''],
+        );
+      }
 
       // Crear workbook
       const wb = XLSX.utils.book_new();

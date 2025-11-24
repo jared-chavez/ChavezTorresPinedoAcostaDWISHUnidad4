@@ -23,6 +23,18 @@ next-env.d.ts
 .DS_Store
 *.pem
 *.pem.key
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+
+# SSL Certificates (no commiteer certificados reales)
+nginx/ssl/*.pem
+nginx/ssl/*.key
+nginx/ssl/*.crt
+nginx/ssl/*.cert
+!nginx/ssl/.gitkeep
 
 # Debug
 npm-debug.log*
@@ -36,6 +48,8 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.prod
+.env.production
 
 # Vercel
 .vercel
@@ -236,4 +250,11 @@ local/
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+# Docker
+# NOTA: Dockerfile, docker-compose.yml y .dockerignore SÍ deben versionarse
+# Solo ignoramos archivos generados y temporales de Docker
+docker-compose.override.yml
+docker-compose.*.local.yml
+*.dockerignore.local
 

@@ -143,7 +143,14 @@ export default function VehicleDetail({ vehicle, session }: VehicleDetailProps) 
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Color:</span>
-                  <span className="text-gray-900 dark:text-white font-medium">{vehicle.color}</span>
+                  <span className="text-gray-900 dark:text-white font-medium flex items-center gap-2">
+                    <span 
+                      className="inline-block w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-600" 
+                      style={{ backgroundColor: vehicle.color }}
+                      title={vehicle.color}
+                    />
+                    {vehicle.color}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Combustible:</span>

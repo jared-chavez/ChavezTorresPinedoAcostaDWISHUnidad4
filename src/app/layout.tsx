@@ -15,8 +15,13 @@ export const metadata: Metadata = {
   title: "Agencia de Vehículos - Nocturna Genesis",
   description: "Sistema de gestión de inventario y ventas de vehículos",
   icons: {
-    icon: '/logo1.png',
-    apple: '/logo1.png',
+    icon: [
+      { url: '/logo1.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo1.png', type: 'image/png' },
+    ],
+    shortcut: '/logo1.png',
   },
 };
 
